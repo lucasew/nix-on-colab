@@ -10,5 +10,5 @@ print(fname)
 with open(fname, 'w') as f:
     dump(argv[1:], f)
 
-run(['su', '-', 'lucasew', '-c', f"deroot_out {fname}"], stdin = stdin, stdout = stdout, stderr = stderr)
+run(['su', '-', 'colab', '-c', f"deroot_out {fname}"], stdin = stdin, stdout = stdout, stderr = stderr)
 
