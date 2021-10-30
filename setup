@@ -3,6 +3,9 @@
 # Busca da pasta atual onde o script foi clonado
 CURRENT_DIR=`cd "$(dirname "$0")"; pwd`
 
+# Liberação de permissão no /content
+chmod 777 /content -Rv
+
 # Criação do usuário não root e autorização para sudo
 useradd -d /content -g users colab
 echo 'colab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
