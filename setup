@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
+
+# Busca da pasta atual onde o script foi clonado
+CURRENT_DIR=`cd "$(dirname "$0")"; pwd`
+
+# Criação do usuário não root e autorização para sudo
 useradd -d /content -g users colab
 echo 'colab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
+# Instalação do nix-portable
 wget https://github.com/DavHau/nix-portable/releases/download/v008/nix-portable -O /bin/nix-portable
 chmod +x /bin/nix-portable
 
+# Bootstrap do nix-portable
 su - colab -c '/bin/nix-portable nix run --verbose nixpkgs#hello'
 
-install -m755 ./deroot_in /bin
-install -m755 ./deroot_out /bin
+install -m755 "$CURRENT_DIR/deroot_in" /bin
+install -m755 "$CURRENT_DIR/deroot_out" /bin
+
