@@ -6,7 +6,6 @@ from sys import argv, stdin, stdout, stderr
 from subprocess import run
 
 fname = mktemp()
-print(fname)
 with open(fname, 'w') as f:
     dump(argv[1:], f)
 
