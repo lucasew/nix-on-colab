@@ -21,3 +21,8 @@ install -m755 "$CURRENT_DIR/deroot_in" /bin
 install -m755 "$CURRENT_DIR/deroot_out" /bin
 install -m755 "$CURRENT_DIR/deroot" /bin
 
+for bin in nix nix-build nix-channel nix-collect-garbage nix-copy-closure nix-daemon nix-env nix-hash nix-instantiate nix-prefetch-url nix-shell nix-store do
+    TMPFILE=$(mktemp)
+    echo "deroot nix-portable $bin \"$@\"" > $TMPFILE
+    install -m755 "$TMPFILE" /bin/$bin
+done
