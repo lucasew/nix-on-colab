@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+
+from getpass import getuser
+from sys import argv, stdin, stdout, stderr
+from json import load
+from subprocess import run
+
+if getuser() == "root":
+    raise "This script can't be run as root"
+
+filename = argv[1]
+
+with open(filename, 'r') as f:
+    args = load(f)
+    run(args, stdin = stdin, stdout = stdout, stderr = stderr)
+

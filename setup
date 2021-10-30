@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+useradd -d /content -g users colab
+echo 'colab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+wget https://github.com/DavHau/nix-portable/releases/download/v008/nix-portable -O /bin/nix-portable
+chmod +x /bin/nix-portable
+
+su - colab -c '/bin/nix-portable nix run --verbose nixpkgs#hello'
+
+install -m755 ./deroot_in /bin
+install -m755 ./deroot_out /bin
