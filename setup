@@ -4,25 +4,30 @@
 CURRENT_DIR=`cd "$(dirname "$0")"; pwd`
 
 # Liberação de permissão no /content
-chmod 777 /content -Rv
+chmod 777 /content
 
 # Criação do usuário não root e autorização para sudo
 useradd -d /content -g users colab
 echo 'colab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Instalação do nix-portable
-wget https://github.com/DavHau/nix-portable/releases/download/v008/nix-portable -O /bin/nix-portable
-chmod +x /bin/nix-portable
-
-# Bootstrap do nix-portable
-# su - colab -c '/bin/nix-portable nix run --verbose nixpkgs#hello'
-
+# Instalação dos scripts utilitários
 install -m755 "$CURRENT_DIR/deroot_in" /bin
 install -m755 "$CURRENT_DIR/deroot_out" /bin
 install -m755 "$CURRENT_DIR/deroot" /bin
 
-for bin in nix nix-build nix-channel nix-collect-garbage nix-copy-closure nix-daemon nix-env nix-hash nix-instantiate nix-prefetch-url nix-shell nix-store; do
-    TMPFILE=`mktemp`
-    echo "deroot nix-portable $bin \"\$@\"" > $TMPFILE
-    install -m755 "$TMPFILE" /bin/$bin
-done
+# Instalação do nix em modo multiuser
+curl -L https://nixos.org/nix/install > /tmp/nix-install
+mkdir -p /etc/nix
+echo 'sandbox = false' > /etc/nix/nix.conf
+echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+
+yes y | deroot sh /tmp/nix-install --daemon
+
+mkdir /content/.nix-defexpr /content/.cache /content/.config/nix -p
+chown colab /content/.nix-defexpr /content/.cache /content/.config/nix -R
+chown colab /nix -R
+
+echo 'sandbox = false' >> /etc/nix/nix.conf
+echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+echo 'trusted-users = colab root @wheel' >> /etc/nix/nix.conf
+
