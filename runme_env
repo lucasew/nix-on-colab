@@ -1,7 +1,0 @@
-# vim=ft:python3
-import os
-# based on '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
-os.environ["PATH"] += ":/nix/var/nix/profiles/default/bin"
-os.environ["__ETC_PROFILE_NIX_SOURCED"] = "1"
-os.environ["NIX_SSL_CERT_FILE"] = "/etc/ssl/certs/ca-certificates.crt"
-os.environ["PATH"] += f":{os.environ["HOME"]}/.nix-profile/bin"

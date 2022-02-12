@@ -4,14 +4,38 @@ from getpass import getuser
 from sys import argv, stdin, stdout, stderr
 from json import load
 from subprocess import Popen
+from os import environ
 
 if getuser() == "root":
     raise "This script can't be run as root"
 
 filename = argv[1]
 
+def append_var(env, key, sep = ":"):
+    parts = []
+    if key == "LD_LIBRARY_PATH" or key == "LIBRARY_PATH":
+        parts.append(f"{env.get('HOME')}/.nix-profile/lib")
+    if key == "PATH":
+        parts.append(f"{env.get('HOME')}/.nix-profile/bin")
+    if key == "MANPATH":
+        parts.append(f"{env.get('HOME')}/.nix-profile/share/man")
+    if environ.get(key) is not None:
+        parts.append(environ[key])
+    if env.get(key) is not None:
+        parts.append(env[key])
+    env[key] = sep.join(parts)
+    return env
+
 with open(filename, 'r') as f:
     args = load(f)
-    p = Popen(args, stdin = stdin, stdout = stdout, stderr = stderr)
+    env = args['env']
+    env['HOME'] = "/content/user"
+    env = append_var(env, '__EGL_VENDOR_LIBRARY_DIRS')
+    env = append_var(env, 'LD_LIBRARY_PATH')
+    env = append_var(env, 'LIBRARY_PATH')
+    env = append_var(env, 'PATH')
+    env = append_var(env, 'MANPATH')
+    env.pop("LD_PRELOAD")
+    p = Popen(args['argv'], env = env, stdin = stdin, stdout = stdout, stderr = stderr)
     p.wait()
 

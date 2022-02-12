@@ -3,11 +3,12 @@
 # Busca da pasta atual onde o script foi clonado
 CURRENT_DIR=`cd "$(dirname "$0")"; pwd`
 
-# Liberação de permissão no /content
-chmod 777 /content
 
 # Criação do usuário não root e autorização para sudo
-useradd -d /content -g users colab
+chmod 777 /content
+
+useradd -m --home-dir /content/user -g users colab
+mkdir -m 0755 /nix && chown colab /nix
 echo 'colab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Instalação dos scripts utilitários
@@ -21,11 +22,7 @@ mkdir -p /etc/nix
 echo 'sandbox = false' > /etc/nix/nix.conf
 echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
 
-yes y | deroot sh /tmp/nix-install --daemon
-
-mkdir /content/.nix-defexpr /content/.cache /content/.config/nix -p
-chown colab /content/.nix-defexpr /content/.cache /content/.config/nix -R
-chown colab /nix -R
+yes y | deroot sh /tmp/nix-install # --daemon
 
 echo 'sandbox = false' >> /etc/nix/nix.conf
 echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
