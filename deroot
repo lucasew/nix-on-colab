@@ -1,3 +1,19 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python3
 
-deroot_in "$@"
+from tempfile import mktemp
+from json import dump
+from sys import argv, stdin, stdout, stderr
+from subprocess import Popen
+from os import environ
+
+fname = mktemp()
+state = dict(env={}, argv=argv[1:])
+for (k, v) in environ.items():
+    state['env'][k] = v
+
+with open(fname, 'w') as f:
+    dump(state, f)
+
+p = Popen(['su', '-', 'colab', '-c', f"deroot_out {fname}"], stdin = stdin, stdout = stdout, stderr = stderr)
+p.wait()
+
