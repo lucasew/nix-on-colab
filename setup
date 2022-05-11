@@ -3,28 +3,32 @@
 # Busca da pasta atual onde o script foi clonado
 CURRENT_DIR=`cd "$(dirname "$0")"; pwd`
 
-
 # Criação do usuário não root e autorização para sudo
 chmod 777 /content
 
-useradd -m --home-dir /content/user -g users colab
-mkdir -m 0755 /nix && chown colab /nix
-echo 'colab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+if [[ ! -d /content/user ]]; then
+    echo "Creating user..."
+    useradd -m --home-dir /content/user -g users colab
+    echo 'colab ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+fi
 
-# Instalação dos scripts utilitários
-install -m755 "$CURRENT_DIR/deroot_in" /bin
-install -m755 "$CURRENT_DIR/deroot_out" /bin
-install -m755 "$CURRENT_DIR/deroot" /bin
+which deroot >/dev/null 2>/dev/null || {
+    echo "Installing deroot wrapper script..."
+    # Instalação dos scripts utilitários
+    install -m755 "$CURRENT_DIR/deroot" /bin
+    install -m755 "$CURRENT_DIR/deroot_out" /bin
+}
 
-# Instalação do nix em modo multiuser
-curl -L https://nixos.org/nix/install > /tmp/nix-install
-mkdir -p /etc/nix
-echo 'sandbox = false' > /etc/nix/nix.conf
-echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
-
-yes y | deroot sh /tmp/nix-install # --daemon
-
-echo 'sandbox = false' >> /etc/nix/nix.conf
-echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
-echo 'trusted-users = colab root @wheel' >> /etc/nix/nix.conf
+if [[ ! -d /nix ]]; then
+    echo "Installing nix..."
+    # Instalação do nix em modo multiuser
+    mkdir -m 0755 /nix && chown colab /nix
+    curl -L https://nixos.org/nix/install > /tmp/nix-install
+    mkdir -p /etc/nix
+    echo 'sandbox = false' > /etc/nix/nix.conf
+    yes y | deroot sh /tmp/nix-install # --daemon
+    echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
+    echo 'sandbox = false' >> /etc/nix/nix.conf
+    echo 'trusted-users = colab root @wheel' >> /etc/nix/nix.conf
+fi
 
