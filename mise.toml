@@ -1,0 +1,44 @@
+[tools]
+go = "1.24.0"
+python = "3.12.0"
+
+[tasks.install]
+description = "Install dependencies"
+run = """
+#!/usr/bin/env bash
+set -e
+mkdir -p ~/.local/bin
+if ! command -v workspaced &> /dev/null; then
+    echo "Installing workspaced..."
+    rm -rf /tmp/workspaced_repo
+    git clone --depth 1 https://github.com/lucasew/workspaced.git /tmp/workspaced_repo
+    cd /tmp/workspaced_repo
+    go build -o ~/.local/bin/workspaced ./cmd/workspaced
+    rm -rf /tmp/workspaced_repo
+else
+    echo "workspaced is already installed"
+fi
+"""
+
+[tasks.lint]
+description = "Lint codebase"
+run = "workspaced codebase lint"
+
+[tasks.fmt]
+description = "Format codebase"
+run = "workspaced codebase format"
+
+[tasks.test]
+description = "Run tests"
+run = """
+python3 -m py_compile deroot deroot_out
+bash -n setup
+"""
+
+[tasks.codegen]
+description = "Update generated code"
+run = "echo 'No codegen'"
+
+[tasks.ci]
+description = "Run CI pipeline"
+depends = ["lint", "test"]
