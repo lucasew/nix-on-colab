@@ -28,10 +28,15 @@ jobs:
         run: echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Install
-        run: mise run install
+        run: mise run install --verbose
+
+      - name: Verify workspaced
+        run: |
+          workspaced --version
+          ls -l $HOME/.local/bin/workspaced
 
       - name: Codegen
-        run: mise run codegen
+        run: mise run codegen --verbose
 
       - name: Check for changes
         id: git-check
@@ -50,7 +55,7 @@ jobs:
           delete-branch: true
 
       - name: CI
-        run: mise run ci
+        run: mise run ci --verbose
 
       - name: Release
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
