@@ -6,14 +6,14 @@ python = "3.12.0"
 description = "Install dependencies"
 run = """
 #!/usr/bin/env bash
-set -e
-mkdir -p ~/.local/bin
+set -ex
+mkdir -p "$HOME/.local/bin"
 if ! command -v workspaced &> /dev/null; then
     echo "Installing workspaced..."
     rm -rf /tmp/workspaced_repo
     git clone --depth 1 https://github.com/lucasew/workspaced.git /tmp/workspaced_repo
     cd /tmp/workspaced_repo
-    go build -o ~/.local/bin/workspaced ./cmd/workspaced
+    go build -o "$HOME/.local/bin/workspaced" ./cmd/workspaced
     rm -rf /tmp/workspaced_repo
 else
     echo "workspaced is already installed"
