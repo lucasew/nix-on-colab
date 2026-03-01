@@ -7,7 +7,7 @@ from subprocess import Popen
 from os import environ
 
 if getuser() == "root":
-    raise "This script can't be run as root"
+    raise Exception("This script can't be run as root")
 
 filename = argv[1]
 

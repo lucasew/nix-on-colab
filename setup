@@ -15,8 +15,8 @@ fi
 which deroot >/dev/null 2>/dev/null || {
     echo "Installing deroot wrapper script..."
     # Instalação dos scripts utilitários
-    install -m755 "$CURRENT_DIR/deroot" /bin
-    install -m755 "$CURRENT_DIR/deroot_out" /bin
+    install -m755 "$CURRENT_DIR/src/deroot" /bin
+    install -m755 "$CURRENT_DIR/src/deroot_out" /bin
 }
 
 if [[ ! -d /nix ]]; then
