@@ -1,0 +1,1 @@
+- 2024-05-20: [High] tempfile.mktemp is vulnerable to race conditions; use mkstemp or NamedTemporaryFile instead.
