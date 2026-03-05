@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+"""
+deroot_out - Environment Reconstructor and Executor
+
+This script runs as the non-root 'colab' user and receives execution context
+from the `deroot` script via a JSON file. Its primary responsibility is to
+reassemble the environment, explicitly injecting Nix profile paths ahead of
+the standard Colab library paths to ensure Nix-installed binaries and libraries
+take precedence, while still falling back to the default Colab ones.
+"""
+
 from getpass import getuser
 from sys import argv, stdin, stdout, stderr
 from json import load
@@ -12,6 +22,10 @@ if getuser() == "root":
 filename = argv[1]
 
 def append_var(env, key, sep = ":"):
+    """
+    Appends Nix-specific paths to a path-like environment variable.
+    Ensures that Nix profiles take priority over system/Colab defaults.
+    """
     parts = []
     if key == "LD_LIBRARY_PATH" or key == "LIBRARY_PATH":
         parts.append(f"{env.get('HOME')}/.nix-profile/lib")
@@ -29,12 +43,20 @@ def append_var(env, key, sep = ":"):
 with open(filename, 'r') as f:
     args = load(f)
     env = args['env']
+
+    # Override HOME so tools know they're operating within the non-root user directory.
     env['HOME'] = "/content/user"
+
+    # Explicitly append/prepend Nix priorities for these specific variables
+    # to avoid clashing with Colab's default container environment setup.
     env = append_var(env, '__EGL_VENDOR_LIBRARY_DIRS')
     env = append_var(env, 'LD_LIBRARY_PATH')
     env = append_var(env, 'LIBRARY_PATH')
     env = append_var(env, 'PATH')
     env = append_var(env, 'MANPATH')
+
+    # Remove LD_PRELOAD to prevent root-owned libraries from conflicting
+    # with the 'colab' user's execution environment.
     env.pop("LD_PRELOAD")
     p = Popen(args['argv'], env = env, stdin = stdin, stdout = stdout, stderr = stderr)
     p.wait()

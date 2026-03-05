@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
+#
+# Initializes a non-root environment in Google Colab to allow safe Nix installation.
+# This script sets up the 'colab' user, configures passwordless sudo,
+# installs utility scripts (deroot/deroot_out) into the system path,
+# and performs a multi-user Nix installation with flakes enabled.
+#
+# Context: Google Colab runs as root by default. Nix multi-user installation
+# strongly expects to be run in a non-root context with standard permissions.
 
 # Busca da pasta atual onde o script foi clonado
 CURRENT_DIR=`cd "$(dirname "$0")"; pwd`
 
 # Criação do usuário não root e autorização para sudo
+# Colab typically mounts /content; we need the non-root user to access it.
 chmod 777 /content
 
 if [[ ! -d /content/user ]]; then
@@ -15,6 +24,8 @@ fi
 which deroot >/dev/null 2>/dev/null || {
     echo "Installing deroot wrapper script..."
     # Instalação dos scripts utilitários
+    # These wrappers are necessary to transition from the default root environment
+    # into the 'colab' user's context, carrying over environment variables.
     install -m755 "$CURRENT_DIR/deroot" /bin
     install -m755 "$CURRENT_DIR/deroot_out" /bin
 }
@@ -22,11 +33,17 @@ which deroot >/dev/null 2>/dev/null || {
 if [[ ! -d /nix ]]; then
     echo "Installing nix..."
     # Instalação do nix em modo multiuser
+    # Create the /nix store and give ownership to the 'colab' user for installation.
     mkdir -m 0755 /nix && chown colab /nix
     curl -L https://nixos.org/nix/install > /tmp/nix-install
     mkdir -p /etc/nix
+    # Colab uses a containerized environment which often breaks Nix's sandbox
     echo 'sandbox = false' > /etc/nix/nix.conf
+
+    # Run the Nix installer as the 'colab' user using the deroot wrapper
     yes y | deroot sh /tmp/nix-install # --daemon
+
+    # Enable modern Nix features and authorize users to control the Nix daemon
     echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
     echo 'sandbox = false' >> /etc/nix/nix.conf
     echo 'trusted-users = colab root @wheel' >> /etc/nix/nix.conf

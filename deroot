@@ -1,12 +1,28 @@
 #!/usr/bin/env python3
 
+"""
+deroot - Root-to-User Context Bridge
+
+This script is the entry point used by root (the default Colab user) to execute
+commands as the non-root 'colab' user. Because `su - colab` strips the environment
+variables that Google Colab relies on (like PATHs to pre-installed libraries),
+this script serializes `environ` and `argv` into a temporary JSON file.
+
+The companion script `deroot_out` is then invoked as the 'colab' user,
+which deserializes this state and reconstructs the necessary execution context
+before running the intended command.
+"""
+
 from tempfile import mktemp
 from json import dump
 from sys import argv, stdin, stdout, stderr
 from subprocess import Popen
 from os import environ
 
+# Generate a temporary filename to pass context securely across the su boundary.
 fname = mktemp()
+
+# Capture all current root environment variables and arguments.
 state = dict(env={}, argv=argv[1:])
 for (k, v) in environ.items():
     state['env'][k] = v
@@ -14,6 +30,8 @@ for (k, v) in environ.items():
 with open(fname, 'w') as f:
     dump(state, f)
 
+# Execute deroot_out as the non-root 'colab' user, passing the path to the state file.
+# stdin, stdout, and stderr are forwarded to allow interactive commands and piping.
 p = Popen(['su', '-', 'colab', '-c', f"deroot_out {fname}"], stdin = stdin, stdout = stdout, stderr = stderr)
 p.wait()
 
