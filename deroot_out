@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+"""
+Reconstructor script (non-root side). Rebuilds the environment from the temporary JSON file, overriding paths (`PATH`, `LD_LIBRARY_PATH`, `MANPATH`, `__EGL_VENDOR_LIBRARY_DIRS`) to give precedence to the Nix profile.
+This ensures the `colab` user has access to Nix tools and libraries without polluting the root environment.
+"""
+
 from getpass import getuser
 from sys import argv, stdin, stdout, stderr
 from json import load
