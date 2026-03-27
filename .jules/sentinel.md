@@ -1,0 +1,1 @@
+- 2026-03-27: [HIGH] Predictable temporary files for scripts can lead to arbitrary code execution/file overwrite if the path can be guessed; use mktemp to securely generate temporary file names.

@@ -23,10 +23,13 @@ if [[ ! -d /nix ]]; then
     echo "Installing nix..."
     # Instalação do nix em modo multiuser
     mkdir -m 0755 /nix && chown colab /nix
-    curl -L https://nixos.org/nix/install > /tmp/nix-install
+    NIX_INSTALL_SCRIPT=$(mktemp /tmp/nix-install.XXXXXX)
+    curl -L https://nixos.org/nix/install > "$NIX_INSTALL_SCRIPT"
+    chmod 755 "$NIX_INSTALL_SCRIPT"
     mkdir -p /etc/nix
     echo 'sandbox = false' > /etc/nix/nix.conf
-    yes y | deroot sh /tmp/nix-install # --daemon
+    yes y | deroot sh "$NIX_INSTALL_SCRIPT" # --daemon
+    rm -f "$NIX_INSTALL_SCRIPT"
     echo 'experimental-features = nix-command flakes' >> /etc/nix/nix.conf
     echo 'sandbox = false' >> /etc/nix/nix.conf
     echo 'trusted-users = colab root @wheel' >> /etc/nix/nix.conf
