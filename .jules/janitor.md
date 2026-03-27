@@ -1,0 +1,1 @@
+- 2024-03-27: Use dictionary literals instead of the dict() constructor for clarity and performance.
