@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Primary entry point script for nix-on-colab.
-# It clones the repository into Colab, creates the non-root `colab` user with sudo privileges, and installs Nix in multi-user mode.
+# It creates the non-root `colab` user with sudo privileges, installs utility scripts, and installs Nix in multi-user mode.
 
 # Busca da pasta atual onde o script foi clonado
 CURRENT_DIR=`cd "$(dirname "$0")"; pwd`
